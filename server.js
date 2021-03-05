@@ -73,7 +73,7 @@ async function viewEmployees() {
     case '...by First Name.':
         async function firstname () {
             const emptyArray = [];
-            const employeeList = await orm.select('*', 'members', `ORDER BY firstname ASC`);
+            const employeeList = await orm.select('*', 'members', 'ORDER BY firstname ASC');
             employeeList.forEach(item=>{
                 let employee={
                     fullname:`${item.firstname} ${item.lastname}`
@@ -99,7 +99,7 @@ async function viewEmployees() {
     case '...by Last Name.':
         async function lastname() {
             const emptyArray = [];
-            const employeeList = await orm.select('*', 'members', `ORDER BY lastname ASC`);
+            const employeeList = await orm.select('*', 'members', 'ORDER BY lastname ASC');
             employeeList.forEach(item=>{
                 let employee={
                     fullname:`${item.lastname}, ${item.firstname}`
@@ -119,13 +119,13 @@ async function viewEmployees() {
             const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE lastname='${employeeLastname}'`);
             console.table(employee);
             menu();
-        };
+        }
         lastname();
         break;
     case '...by Role.':
         async function role() {
             const emptyArray = [];
-            const employeeList = await orm.select('*', 'roles', `ORDER BY title ASC`);
+            const employeeList = await orm.select('*', 'roles', 'ORDER BY title ASC');
             employeeList.forEach(item=>{
                 let roles={
                     title: `${item.title}`
@@ -146,13 +146,13 @@ async function viewEmployees() {
             const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE role_id='${roleID[0].id}'`);
             console.table(employee);
             menu();
-        };
+        }
         role();
         break;
     case '...by Manager.':
         async function manager() {
             const emptyArray = [];
-            const managerList = await orm.select('*', 'managers', `ORDER BY lastname ASC`);
+            const managerList = await orm.select('*', 'managers', 'ORDER BY lastname ASC');
             managerList.forEach(item=>{
                 let managers={
                     fullname:`${item.lastname}, ${item.firstname}`
@@ -173,13 +173,13 @@ async function viewEmployees() {
             const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE manager_id='${id[0].id}'`);
             console.table(employee);
             menu();
-        };
+        }
         manager();
         break;
-        case '...by Department.':
+    case '...by Department.':
         async function department() {
             const emptyArray = [];
-            const departments = await orm.select('*', 'departments', `ORDER BY depart_name ASC`);
+            const departments = await orm.select('*', 'departments', 'ORDER BY depart_name ASC');
             departments.forEach(item=>{
                 let departments={
                     departName:`${item.depart_name}`
@@ -200,7 +200,7 @@ async function viewEmployees() {
             const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE depart_id='${id[0].id}'`);
             console.table(employee);
             menu();
-        };
+        }
         department();
         break;
     default:
@@ -208,24 +208,138 @@ async function viewEmployees() {
         break;
     }
 }
-//     const employee = await orm.select('*', 'members', `WHERE firstname='${input.options}'`);
-//     const totalSalary = await orm.select('SUM(salary) AS totalSalary', 'members', `WHERE depart_id=${id[0].id}`)
 
-//     console.log (`\n\n Total salary of ${input.options}:`, `$${totalSalary[0].totalSalary} \n\n`);
-//     break;
-// case '...by Last Name':
-//     viewEmployees();
-//     break;
-// case '...by Role.':
-//     dealWithEmployees();
-//     break;
-// case '...by Manager.':
-//     dealWithDepartments();
-//     break;
-// case '...by Department.':
-//     dealWithRoles();
-//     break;
-// default:
-//     menu();
-//     break;
+async function dealWithEmployees() {
+    const emptyArrayRoles = [];
+    const roles = await orm.select('title', 'roles', 'ORDER BY title ASC');
+    roles.forEach(item=>{
+        let role={
+            title:`${item.title}`
+        }
+        emptyArrayRoles.push(role.title);
+    });
+    const emptyArrayManagers = [];
+    const managers = await orm.select('lastname, firstname', 'managers', 'ORDER BY lastname ASC');
+    managers.forEach(item=>{
+        let manager={
+            fullname:`${item.lastname}, ${item.firstname}`
+        }
+        emptyArrayManagers.push(manager.fullname);
+    });
+    const input = await inquirer.prompt([
+        {
+            type: 'list',
+            message: 'Choose your options.',
+            name: 'options',
+            choices: ['Add an Employee.', 'Edit an Employee.', 'Terminate an Employee.'],
+        },
+    ]);
+    switch (input.options) {
+    case 'Add an Employee.':
+        async function addEmployee () {
+            const input = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'What is the Employee\'s first name?',
+                    name: 'firstname',
+                    validate: (value) => { if (value) { return true } else { return 'You need to give the name to continue.' } },
+                },
+                {
+                    type: 'input',
+                    message: 'What is the Employee\'s last name?',
+                    name: 'lastname',
+                    validate: (value) => { if (value) { return true } else { return 'You need to give the name to continue.' } },
+                },
+                {
+                    type: 'input',
+                    message: 'What is the Employee\'s salary? Enter only the number without the dollar sign.',
+                    name: 'salary',
+                    validate: (value) => { if (value) { return true } else { return 'You need to give a salary amount to continue.' } },
+                },
+                {
+                    type: 'list',
+                    message: 'What is the Employee\'s Role?',
+                    name: 'role',
+                    choices: emptyArrayRoles,
+                },
+                {
+                    type: 'list',
+                    message: 'What is the Employee\'s Manager?',
+                    name: 'manager',
+                    choices: emptyArrayManagers,
+                },
+            ]);
+            await orm.insert ('members', 'firstname, lastname, salary, role_id, manager_id')
+            // async insert(tableName, column, values) {
+            //     const sql = `INSERT INTO ${tableName} (${column}) VALUES ${values}`;
+            //     await db.query(sql);
+            // },
+
+        }
+        addEmployee();
+        break;
+    // case 'Edit an Employee.':
+        // async function firstname () {
+        //     const emptyArray = [];
+        //     const employeeList = await orm.select('*', 'members', 'ORDER BY firstname ASC');
+        //     employeeList.forEach(item=>{
+        //         let employee={
+        //             fullname:`${item.firstname} ${item.lastname}`
+        //         }
+        //         emptyArray.push(employee.fullname);
+        //     });
+        //     const input = await inquirer.prompt([
+        //         {
+        //             type: 'list',
+        //             message: 'View Employee...',
+        //             name: 'options',
+        //             choices: emptyArray,
+        //         },
+        //     ]);
+        //     const employeeFirstname = input.options.split(' ')[0];
+        //     console.log(`This is the info on this Employee: ${employeeFirstname}...`)
+        //     const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE firstname='${employeeFirstname}'`);
+        //     console.table(employee);
+        //     menu();
+        // }
+        // firstname();
+        // break;
+    // case 'Terminate an Employee.':
+        // async function firstname () {
+        //     const emptyArray = [];
+        //     const employeeList = await orm.select('*', 'members', 'ORDER BY firstname ASC');
+        //     employeeList.forEach(item=>{
+        //         let employee={
+        //             fullname:`${item.firstname} ${item.lastname}`
+        //         }
+        //         emptyArray.push(employee.fullname);
+        //     });
+        //     const input = await inquirer.prompt([
+        //         {
+        //             type: 'list',
+        //             message: 'View Employee...',
+        //             name: 'options',
+        //             choices: emptyArray,
+        //         },
+        //     ]);
+        //     const employeeFirstname = input.options.split(' ')[0];
+        //     console.log(`This is the info on this Employee: ${employeeFirstname}...`)
+        //     const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE firstname='${employeeFirstname}'`);
+        //     console.table(employee);
+        //     menu();
+        // }
+        // firstname();
+        // break;
+    default:
+        menu();
+        break;
+    }
+}
+
+// async function dealWithDepartments() {
+
+// }
+
+// async function dealWithRoles(){
+
 // }
