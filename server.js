@@ -76,15 +76,14 @@ async function viewEmployees() {
             const employeeList = await orm.select('*', 'members', `ORDER BY firstname ASC`);
             employeeList.forEach(item=>{
                 let employee={
-                    fullname:`${item.firstname} ${item.lastname}`,
-                    firstname: `${item.firstname}`
+                    fullname:`${item.firstname} ${item.lastname}`
                 }
                 emptyArray.push(employee.fullname);
             });
             const input = await inquirer.prompt([
                 {
                     type: 'list',
-                    message: 'View Employees...',
+                    message: 'View Employee...',
                     name: 'options',
                     choices: emptyArray,
                 },
@@ -99,30 +98,110 @@ async function viewEmployees() {
         break;
     case '...by Last Name.':
         async function lastname() {
-            const emptyArray2 = [];
-            const employeeList2 = await orm.select('*', 'members', `ORDER BY lastname ASC`);
-            employeeList2.forEach(item=>{
+            const emptyArray = [];
+            const employeeList = await orm.select('*', 'members', `ORDER BY lastname ASC`);
+            employeeList.forEach(item=>{
                 let employee={
-                    fullname:`${item.lastname}, ${item.firstname}`,
-                    lastname: `${item.lastname}`
+                    fullname:`${item.lastname}, ${item.firstname}`
                 }
-                emptyArray2.push(employee.fullname);
+                emptyArray.push(employee.fullname);
             });
-            const input2 = await inquirer.prompt([
+            const input = await inquirer.prompt([
                 {
                     type: 'list',
-                    message: 'View Employees...',
+                    message: 'View Employee...',
                     name: 'options',
-                    choices: emptyArray2,
+                    choices: emptyArray,
                 },
             ]);
-            const employeeLastname = input2.options.split(', ')[0];
+            const employeeLastname = input.options.split(', ')[0];
             console.log(`This is the info on this Employee: ${employeeLastname}...`)
-            const employee2 = await orm.select('firstname, lastname, salary', 'members', `WHERE lastname='${employeeLastname}'`);
-            console.table(employee2);
+            const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE lastname='${employeeLastname}'`);
+            console.table(employee);
             menu();
         };
         lastname();
+        break;
+    case '...by Role.':
+        async function role() {
+            const emptyArray = [];
+            const employeeList = await orm.select('*', 'roles', `ORDER BY title ASC`);
+            employeeList.forEach(item=>{
+                let roles={
+                    title: `${item.title}`
+                }
+                emptyArray.push(roles.title);
+            });
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'View by Role...',
+                    name: 'options',
+                    choices: emptyArray,
+                },
+            ]);
+            const roleTitle = input.options;
+            console.log(`This is the list of Employees with the Role: ${roleTitle}...`)
+            const roleID = await orm.select('id', 'roles', `WHERE title='${roleTitle}'`)
+            const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE role_id='${roleID[0].id}'`);
+            console.table(employee);
+            menu();
+        };
+        role();
+        break;
+    case '...by Manager.':
+        async function manager() {
+            const emptyArray = [];
+            const managerList = await orm.select('*', 'managers', `ORDER BY lastname ASC`);
+            managerList.forEach(item=>{
+                let managers={
+                    fullname:`${item.lastname}, ${item.firstname}`
+                }
+                emptyArray.push(managers.fullname);
+            });
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'View by Manager...',
+                    name: 'options',
+                    choices: emptyArray,
+                },
+            ]);
+            const manager = input.options.split(', ')[0];
+            console.log(`This is the list of Employees by Manager: ${manager}...`)
+            const id = await orm.select('id', 'managers', `WHERE lastname='${manager}'`)
+            const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE manager_id='${id[0].id}'`);
+            console.table(employee);
+            menu();
+        };
+        manager();
+        break;
+        case '...by Department.':
+        async function department() {
+            const emptyArray = [];
+            const departments = await orm.select('*', 'departments', `ORDER BY depart_name ASC`);
+            departments.forEach(item=>{
+                let departments={
+                    departName:`${item.depart_name}`
+                }
+                emptyArray.push(departments.departName);
+            });
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'View by Department...',
+                    name: 'options',
+                    choices: emptyArray,
+                },
+            ]);
+            const department = input.options;
+            console.log(`This is the list of Employees by Department: ${department}...`)
+            const id = await orm.select('id', 'departments', `WHERE depart_name='${department}'`)
+            const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE depart_id='${id[0].id}'`);
+            console.table(employee);
+            menu();
+        };
+        department();
         break;
     default:
         menu();
