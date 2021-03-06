@@ -318,7 +318,7 @@ async function dealWithEmployees() {
         break;
     case 'Edit an Employee.':
         async function editEmployee () {
-            console.log(` \n [Updating an Employee\'s Info...] \n`);
+            console.log(` \n [Identifying the Employee\'s Location...] \n`);
             const input = await inquirer.prompt([
                 {
                     type: 'list',
@@ -391,7 +391,7 @@ async function dealWithEmployees() {
                 ]);
                 await orm.update('members', `firstname='${input4a.firstname}'`, `id='${employeeID}'`);
                 console.log(`\n [Newly Updated First Name] ${input4a.firstname} \n`);
-                editEmployee();
+                menu();
                 break;
             case 'Last name':
                 const input4b = await inquirer.prompt([
@@ -410,7 +410,7 @@ async function dealWithEmployees() {
                 ]);
                 await orm.update('members', `lastname='${input4b.lastname}'`, `id='${employeeID}'`);
                 console.log(`\n [Newly Updated Info] Last name: ${input4b.lastname} \n`);
-                editEmployee();
+                menu();
                 break;
             case 'Salary':
                 const input4c = await inquirer.prompt([
@@ -429,7 +429,7 @@ async function dealWithEmployees() {
                 ]);
                 await orm.update('members', `salary='${input4c.salary}'`, `id='${employeeID}'`);
                 console.log(`\n [Newly Updated Info] Salary: ${input4c.salary} \n`);
-                editEmployee();
+                menu();
                 break;
             case 'Department/Manager/Role':
                 const input4di = await inquirer.prompt([
@@ -480,7 +480,7 @@ async function dealWithEmployees() {
                 await orm.update('members', `role_id=${roleID[0].id}, manager_id=${managerID}, depart_id=${departmentID[0].id}`, `id='${employeeID}'`);
                 console.log(`\n [Newly Updated Info] Department: [ ${input4di.department} ], Manager: [ ${input4dii.manager} ], Role: [ ${input4dii.role} ] \n`);
 
-                editEmployee();
+                menu();
                 break;
             default:
                 menu();
@@ -491,8 +491,53 @@ async function dealWithEmployees() {
         break;
     case 'Terminate an Employee.':
         async function terminateEmployee(){
-            console.log (`\n [Terminating an Employee...] \n`)
-
+            console.log (`\n [Identifying the Employee...] \n`)
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What is the Employee\'s Department?',
+                    name: 'department',
+                    choices: emptyArrayDepartments,
+                },
+            ]);
+            const departmentID = await orm.select('id', 'departments', `WHERE depart_name='${input.department}'`);
+            const emptyArrayManagers = [];
+            const managers = await orm.select('*', 'managers', `WHERE depart_id='${departmentID[0].id}' ORDER BY lastname ASC`);
+            managers.forEach(item=>{
+                let manager={
+                    fullinfo:`[ID]: ${item.id}, [Name]: ${item.lastname}, ${item.firstname}`
+                }
+                emptyArrayManagers.push(manager.fullinfo);
+            });
+            const input2 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Who is the Employee\'s Manager?',
+                    name: 'manager',
+                    choices: emptyArrayManagers,
+                },
+            ]);
+            const managerID = input2.manager.split(', ')[0].substr(6);
+            const emptyArrayEmployees = [];
+            const employees = await orm.select('*', 'members', `WHERE manager_id='${managerID}' ORDER BY lastname ASC`);
+            employees.forEach(item=>{
+                let employee={
+                    fullname: `[ID]: ${item.id}, [Name]: ${item.lastname}, ${item.firstname}`
+                }
+                emptyArrayEmployees.push(employee.fullname);
+            });
+            const input3 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Choose the Employee to terminate.',
+                    name: 'employee',
+                    choices: emptyArrayEmployees,
+                },
+            ]);
+            console.log(`\n Terminated: [ ${input3.employee} ] \n`)
+            const employeeID = input3.employee.split(', ')[0].substr(6);
+            await orm.delete( 'members', `id=${employeeID}` );
+            menu();
         }
         terminateEmployee();
         break;
