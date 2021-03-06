@@ -11,7 +11,7 @@ const orm = {
     },
 
     async insert(tableName, column, values) {
-        const sql = `INSERT INTO ${tableName} (${column}) VALUES ${values}`;
+        const sql = `INSERT INTO ${tableName} (${column}) VALUES (${values})`;
         await db.query(sql);
     },
 
