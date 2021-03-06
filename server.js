@@ -229,6 +229,7 @@ async function dealWithEmployees() {
     switch (input.options) {
     case 'Add an Employee.':
         async function addEmployee () {
+            console.log (`\n [Adding an Employee...] \n`);
             const input = await inquirer.prompt([
                 {
                     type: 'list',
@@ -239,12 +240,12 @@ async function dealWithEmployees() {
             ]);
             const departmentID = await orm.select('id', 'departments', `WHERE depart_name='${input.department}'`);
             const emptyArrayManagers = [];
-            const managers = await orm.select('lastname, firstname', 'managers', `WHERE depart_id='${departmentID[0].id}' ORDER BY lastname ASC`);
+            const managers = await orm.select('*', 'managers', `WHERE depart_id='${departmentID[0].id}' ORDER BY lastname ASC`);
             managers.forEach(item=>{
                 let manager={
-                    fullname:`${item.lastname}, ${item.firstname}`
+                    fullinfo:`[ID]: ${item.id}, [Name]: ${item.lastname}, ${item.firstname}`
                 }
-                emptyArrayManagers.push(manager.fullname);
+                emptyArrayManagers.push(manager.fullinfo);
             });
             const emptyArrayRoles = [];
             const roles = await orm.select('title', 'roles', `WHERE depart_id='${departmentID[0].id}' ORDER BY title ASC`);
@@ -257,7 +258,7 @@ async function dealWithEmployees() {
             const input2 = await inquirer.prompt([
                 {
                     type: 'list',
-                    message: 'What is the Employee\'s Manager?',
+                    message: 'Who is the Employee\'s Manager?',
                     name: 'manager',
                     choices: emptyArrayManagers,
                 },
@@ -305,71 +306,201 @@ async function dealWithEmployees() {
                 },
             ]);
             const roleID = await orm.select('id', 'roles', `WHERE title='${input2.role}'`);
-            const managerLastname = input2.manager.split(', ')[0];
-            const managerID = await orm.select('id', 'managers', `WHERE lastname='${managerLastname}'`);
-            console.log(`[The Employee's info is entered into the database]: [First Name, Last Name, Salary, Role, Manager, Department]: [${input2.firstname}, ${input2.lastname}, $ ${input2.salary}, ${input2.role}, ${input2.manager}, ${input.department}]`);
-            await orm.insert ('members', 'firstname, lastname, salary, role_id, manager_id, depart_id', `'${input2.firstname}', '${input2.lastname}', '${input2.salary}', ${roleID[0].id}, ${managerID[0].id}, ${departmentID[0].id}`);
+
+            const managerID = input2.manager.split(', ')[0].substr(6);
+
+            console.log(`\n [The Employee's info is entered into the database]: [First Name, Last Name, Salary, Role, Manager, Department]: [${input2.firstname}, ${input2.lastname}, $ ${input2.salary}, ${input2.role}, ${input2.manager}, ${input.department}] \n`);
+
+            await orm.insert ('members', 'firstname, lastname, salary, role_id, manager_id, depart_id', `'${input2.firstname}', '${input2.lastname}', '${input2.salary}', ${roleID[0].id}, ${managerID}, ${departmentID[0].id}`);
+            menu();
         }
         addEmployee();
         break;
-    // case 'Edit an Employee.':
-    //     async function firstname () {
-    //         const emptyArray = [];
-    //         const employeeList = await orm.select('*', 'members', 'ORDER BY firstname ASC');
-    //         employeeList.forEach(item=>{
-    //             let employee={
-    //                 fullname:`${item.firstname} ${item.lastname}`
-    //             }
-    //             emptyArray.push(employee.fullname);
-    //         });
-    //         const input = await inquirer.prompt([
-    //             {
-    //                 type: 'list',
-    //                 message: 'View Employee...',
-    //                 name: 'options',
-    //                 choices: emptyArray,
-    //             },
-    //         ]);
-    //         const employeeFirstname = input.options.split(' ')[0];
-    //         console.log(`This is the info on this Employee: ${employeeFirstname}...`)
-    //         const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE firstname='${employeeFirstname}'`);
-    //         console.table(employee);
-    //         menu();
-    //     }
-    //     firstname();
-    //     break;
-    // case 'Terminate an Employee.':
-    //     async function firstname () {
-    //         const emptyArray = [];
-    //         const employeeList = await orm.select('*', 'members', 'ORDER BY firstname ASC');
-    //         employeeList.forEach(item=>{
-    //             let employee={
-    //                 fullname:`${item.firstname} ${item.lastname}`
-    //             }
-    //             emptyArray.push(employee.fullname);
-    //         });
-    //         const input = await inquirer.prompt([
-    //             {
-    //                 type: 'list',
-    //                 message: 'View Employee...',
-    //                 name: 'options',
-    //                 choices: emptyArray,
-    //             },
-    //         ]);
-    //         const employeeFirstname = input.options.split(' ')[0];
-    //         console.log(`This is the info on this Employee: ${employeeFirstname}...`)
-    //         const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE firstname='${employeeFirstname}'`);
-    //         console.table(employee);
-    //         menu();
-    //     }
-    //     firstname();
-    //     break;
+    case 'Edit an Employee.':
+        async function editEmployee () {
+            console.log(` \n [Updating an Employee\'s Info...] \n`);
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What is the Employee\'s Department?',
+                    name: 'department',
+                    choices: emptyArrayDepartments,
+                },
+            ]);
+            const departmentID = await orm.select('id', 'departments', `WHERE depart_name='${input.department}'`);
+            const emptyArrayManagers = [];
+            const managers = await orm.select('*', 'managers', `WHERE depart_id='${departmentID[0].id}' ORDER BY lastname ASC`);
+            managers.forEach(item=>{
+                let manager={
+                    fullinfo:`[ID]: ${item.id}, [Name]: ${item.lastname}, ${item.firstname}`
+                }
+                emptyArrayManagers.push(manager.fullinfo);
+            });
+            const input2 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Who is the Employee\'s Manager?',
+                    name: 'manager',
+                    choices: emptyArrayManagers,
+                },
+            ]);
+            const managerID = input2.manager.split(', ')[0].substr(6);
+            const emptyArrayEmployees = [];
+            const employees = await orm.select('*', 'members', `WHERE manager_id='${managerID}' ORDER BY lastname ASC`);
+            employees.forEach(item=>{
+                let employee={
+                    fullname: `[ID]: ${item.id}, [Name]: ${item.lastname}, ${item.firstname}`
+                }
+                emptyArrayEmployees.push(employee.fullname);
+            });
+            const input3 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Choose the Employee to update.',
+                    name: 'employee',
+                    choices: emptyArrayEmployees,
+                },
+            ]);
+            const employeeID = input3.employee.split(', ')[0].substr(6);
+
+            console.log(`\n Updating Employee: [ ${input3.employee} ] \n`)
+
+            const input4 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What would you like to update?',
+                    name: 'options',
+                    choices: ['First name', 'Last name', 'Salary', 'Department/Manager/Role'],
+                },
+            ]);
+            switch (input4.options) {
+            case 'First name':
+                const input4a = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        message: 'What is the Employee\'s first name?',
+                        name: 'firstname',
+                        validate: (value) => {
+                            if (value) {
+                                return true
+                            } else {
+                                return 'You need to give the name to continue.'
+                            }
+                        },
+                    },
+                ]);
+                await orm.update('members', `firstname='${input4a.firstname}'`, `id='${employeeID}'`);
+                console.log(`\n [Newly Updated First Name] ${input4a.firstname} \n`);
+                editEmployee();
+                break;
+            case 'Last name':
+                const input4b = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        message: 'What is the Employee\'s last name?',
+                        name: 'lastname',
+                        validate: (value) => {
+                            if (value) {
+                                return true
+                            } else {
+                                return 'You need to give the name to continue.'
+                            }
+                        },
+                    },
+                ]);
+                await orm.update('members', `lastname='${input4b.lastname}'`, `id='${employeeID}'`);
+                console.log(`\n [Newly Updated Info] Last name: ${input4b.lastname} \n`);
+                editEmployee();
+                break;
+            case 'Salary':
+                const input4c = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        message: 'What is the Employee\'s salary? Include only the numbers, without the dollar sign.',
+                        name: 'salary',
+                        validate: (value) => {
+                            if (value) {
+                                return true
+                            } else {
+                                return 'You need to give the salary to continue.'
+                            }
+                        },
+                    },
+                ]);
+                await orm.update('members', `salary='${input4c.salary}'`, `id='${employeeID}'`);
+                console.log(`\n [Newly Updated Info] Salary: ${input4c.salary} \n`);
+                editEmployee();
+                break;
+            case 'Department/Manager/Role':
+                const input4di = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        message: 'What is the Employee\'s updated Department?',
+                        name: 'department',
+                        choices: emptyArrayDepartments,
+                    },
+                ]);
+                const departmentID = await orm.select('id', 'departments', `WHERE depart_name='${input4di.department}'`);
+
+                const emptyArrayManagers = [];
+                const managers = await orm.select('*', 'managers', `WHERE depart_id='${departmentID[0].id}' ORDER BY lastname ASC`);
+                managers.forEach(item=>{
+                    let manager={
+                        fullinfo:`[ID]: ${item.id}, [Name]: ${item.lastname}, ${item.firstname}`
+                    }
+                    emptyArrayManagers.push(manager.fullinfo);
+                });
+
+                const emptyArrayRoles = [];
+                const roles = await orm.select('title', 'roles', `WHERE depart_id='${departmentID[0].id}' ORDER BY title ASC`);
+                roles.forEach(item=>{
+                    let role={
+                        title:`${item.title}`
+                    }
+                    emptyArrayRoles.push(role.title);
+                });
+
+                const input4dii = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        message: 'What is the Employee\'s updated Manager?',
+                        name: 'manager',
+                        choices: emptyArrayManagers,
+                    },
+                    {
+                        type: 'list',
+                        message: 'What is the Employee\'s updated Role?',
+                        name: 'role',
+                        choices: emptyArrayRoles,
+                    },
+                ]);
+                const managerID = input4dii.manager.split(', ')[0].substr(6);
+                const roleID = await orm.select('id', 'roles', `WHERE title='${input4dii.role}'`);
+
+                await orm.update('members', `role_id=${roleID[0].id}, manager_id=${managerID}, depart_id=${departmentID[0].id}`, `id='${employeeID}'`);
+                console.log(`\n [Newly Updated Info] Department: [ ${input4di.department} ], Manager: [ ${input4dii.manager} ], Role: [ ${input4dii.role} ] \n`);
+
+                editEmployee();
+                break;
+            default:
+                menu();
+                break;
+            }
+        }
+        editEmployee();
+        break;
+    case 'Terminate an Employee.':
+        async function terminateEmployee(){
+            console.log (`\n [Terminating an Employee...] \n`)
+
+        }
+        terminateEmployee();
+        break;
     default:
         menu();
         break;
     }
 }
-
 // async function dealWithDepartments() {
 
 // }
