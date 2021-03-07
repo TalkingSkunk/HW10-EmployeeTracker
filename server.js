@@ -630,7 +630,7 @@ async function dealWithDepartments() {
             ]);
             const departmentID = await orm.select( '*', 'departments', `WHERE depart_name='${input.department}'` )
             const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE depart_id=${departmentID[0].id}`);
-            
+
             if( employee[0] ){
                 console.log(`\n The Department [ ${input.department} ] still has Employees. Please relocate them prior to deleting the Department.`);
                 console.table(employee);
@@ -649,6 +649,107 @@ async function dealWithDepartments() {
     }
 }
 
-// async function dealWithRoles(){
+async function dealWithRoles(){
+    const emptyArrayDepartments = [];
+    const departments = await orm.select('depart_name', 'departments', 'ORDER BY depart_name ASC');
+    departments.forEach(item=>{
+        let department={
+            name:`${item.depart_name}`
+        }
+        emptyArrayDepartments.push(department.name);
+    });
+    const input = await inquirer.prompt([
+        {
+            type: 'list',
+            message: 'Choose your options.',
+            name: 'options',
+            choices: ['Add a Role.', 'Update a Role\'s Info.', 'Remove a Role.'],
+        },
+    ]);
+    switch (input.options) {
+    case 'Add a Role.':
+        async function addRole (){
+            console.log ('\n [Adding a Role...] \n');
+            const input = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'What is the Role\'s name?',
+                    name: 'role',
+                    validate: (value) => {
+                        if (value) {
+                            return true
+                        } else {
+                            return 'You need to give the name to continue.'
+                        }
+                    },
+                },
+            ]);
+            await orm.insert('roles', 'title', `'${input.role}'`);
+            console.log(`\n [The new Role is entered into the database]: ${input.role} \n`);
+            menu();
+        }
+        addRole();
+        break;
+    case 'Update a Role\'s Info.':
+        async function editRole() {
+            console.log ('\n [Locating the Role...] \n');
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What is the Department the Role is located in?',
+                    name: 'department',
+                    choices: emptyArrayDepartments,
+                },
+            ]);
+            const departmentID = await orm.select('id', 'departments', `WHERE depart_name='${input.department}'`);
+            const emptyArrayRoles = [];
+            const roles = await orm.select('*', 'roles', `WHERE depart_id='${departmentID[0].id}' ORDER BY title ASC`);
+            roles.forEach(item=>{
+                let role={
+                    title:`${item.title}`,
+                }
+                emptyArrayRoles.push(role.title);
+            });
 
-// }
+            const input2 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What is the Role?',
+                    name: 'roleOld',
+                    choices: emptyArrayRoles,
+                },
+                {
+                    type: 'input',
+                    message: 'What is the Role\'s new name?',
+                    name: 'roleNew',
+                    validate: (value) => {
+                        if (value) {
+                            return true
+                        } else {
+                            return 'You need to give the name to continue.'
+                        }
+                    },
+                },
+            ]);
+
+            console.log(`\n Updating Role: [ ${input2.roleOld} ] \n`);
+
+            await orm.update('roles', `title='${input2.roleNew}'`, `title='${input2.roleOld}'`);
+            console.log(`\n [ ${input2.roleOld} ]'s new name is: [ ${input2.roleNew} ] \n`);
+            menu();
+        }
+        editRole();
+        break;
+    case 'Remove a Role.':
+        async function removeRole() {
+            console.log ('\n [Deleting a Role...] \n');
+
+            menu();
+        }
+        removeRole();
+        break;
+    default:
+        menu();
+        break;
+    }
+}
