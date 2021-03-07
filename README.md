@@ -87,7 +87,11 @@ SOFTWARE.
     1. ``` npm init -y ```, and
     2. ``` npm install ```
 * You need to create ``` .env ``` file which will contain your MySQL Workbench password ==> [ PASSWORD = your_password ]
-
+* Run your MySQL server, and your MySQL Workbench.
+* Copy and paste into MySQL Workbench:
+    1. ``` schema.sql ```
+    2. ``` seed.sql ```
+* Execute the pasted script in the MySQL Workbench.
 * Run ``` npm start ``` on your command line, and follow the prompts.
 
 
