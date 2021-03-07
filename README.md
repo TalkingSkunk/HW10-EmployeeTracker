@@ -1,139 +1,144 @@
-# Unit 12 MySQL Homework: Employee Tracker
+# Homework10 - Hospital Employee Tracker (Using SQL)
 
-Developers are often tasked with creating interfaces that make it easy for non-developers to view and interact with information stored in databases. Often these interfaces are known as **C**ontent **M**anagement **S**ystems. In this homework assignment, your challenge is to architect and build a solution for managing a company's employees using node, inquirer, and MySQL.
+**Demonstration Video**
 
-## Instructions
 
-Design the following database schema containing three tables:
+**GitHub Repository URL**
+https://github.com/TalkingSkunk/HW10-EmployeeTracker
 
-![Database Schema](Assets/schema.png)
 
-* **department**:
 
-  * **id** - INT PRIMARY KEY
-  * **name** - VARCHAR(30) to hold department name
+## Table of Contents
 
-* **role**:
+* [Badges](#badges)
+* [License](#license)
+* [Description](#description)
+* [Installation](#installation)
+* [Features](#features)
+* [Credits](#credits)
+* [Contributing](#contributing)
+* [Tests](#tests)
+* [Contact](#contact)
 
-  * **id** - INT PRIMARY KEY
-  * **title** -  VARCHAR(30) to hold role title
-  * **salary** -  DECIMAL to hold role salary
-  * **department_id** -  INT to hold reference to department role belongs to
 
-* **employee**:
 
-  * **id** - INT PRIMARY KEY
-  * **first_name** - VARCHAR(30) to hold employee first name
-  * **last_name** - VARCHAR(30) to hold employee last name
-  * **role_id** - INT to hold reference to role employee has
-  * **manager_id** - INT to hold reference to another employee that manages the employee being Created. This field may be null if the employee has no manager
-  
-Build a command-line application that at a minimum allows the user to:
+## Badges
+![SQL](https://img.shields.io/badge/SQL-Spearhead-blue)  
+![JS](https://img.shields.io/badge/JavaScript-Strife-darkgreen)  
+![NODEJS](https://img.shields.io/badge/NodeJS-Steadfast-saddlebrown)  
+![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)  
 
-  * Add departments, roles, employees
 
-  * View departments, roles, employees
 
-  * Update employee roles
+## License
 
-Bonus points if you're able to:
+MIT License
 
-  * Update employee managers
+Copyright (c) 2021 Sam Kim
 
-  * View employees by manager
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-  * Delete departments, roles, and employees
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-  * View the total utilized budget of a department -- ie the combined salaries of all employees in that department
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-We can frame this challenge as follows:
+
+
+## Description
+
+### What needs are we meeting?
+* You are a Human Resources Admin at a Hospital,
+    * who needs to keep a meticulous record of the muster of all Hospital Employees,
+    * So you need a digital SQL database.
+
+
+### What would be the foreseeable consequences if the needs are unmet?
+* You will not be able to keep count of the Employees at the Hospital, leading to lack of organization and effective team work.
+
+
+### What were your goals?
+* Create an interactive database, which allows you to:
+  - Add/Edit/Remove an Employee/Role/Department.
+  - See the total salary of a Department.
+  - View Employees by various catergories.
+
+
+### What have you done about it?
+* All goals are met.
+
+
+
+## Installation
+
+* You need to install nodejs to your local computer by downloading LTS from: [ https://nodejs.org/en/ ].
+* You need to download the necessary ``` npm packages ``` by entering into your command line:
+    1. ``` npm init -y ```, and
+    2. ``` npm install ```
+* You need to create ``` .env ``` file which will contain your MySQL Workbench password ==> [ PASSWORD = your_password ]
+
+* Run ``` npm start ``` on your command line, and follow the prompts.
+
+
+
+
+## Features
 
 ```
-As a business owner
-I want to be able to view and manage the departments, roles, and employees in my company
-So that I can organize and plan my business
+* Given you have started ``` npm start ``` on your command line,
+    * When you do not enter any inputs,
+        - Then prompt will give an error message, and refuse to continue.
+    * When you finish the prompts,
+        - Then the application will perform your requests.
+    * When you try to delete a Department with Employees still connected to it,
+        - Then the application asks you to relocate the Employees prior to deleting Department.
+    * When you try to delete a Role with Employees still connected to it,
+        - Then the application asks you to relocate the Employees prior to deleting Role.
 ```
 
-How do you deliver this? Here are some guidelines:
-
-* Use the [MySQL](https://www.npmjs.com/package/mysql) NPM package to connect to your MySQL database and perform queries.
-
-* Use [InquirerJs](https://www.npmjs.com/package/inquirer/v/0.2.3) NPM package to interact with the user via the command-line.
-
-* Use [console.table](https://www.npmjs.com/package/console.table) to print MySQL rows to the console. There is a built-in version of `console.table`, but the NPM package formats the data a little better for our purposes.
-
-* You may wish to have a separate file containing functions for performing specific SQL queries you'll need to use. Could a constructor function or a class be helpful for organizing these?
-
-* You will need to perform a variety of SQL JOINS to complete this assignment, and it's recommended you review the week's activities if you need a refresher on this.
-
-![Employee Tracker](Assets/employee-tracker.gif)
-
-### Hints
-
-* You may wish to include a `seed.sql` file to pre-populate your database. This will make development of individual features much easier.
-
-* Focus on getting the basic functionality completed before working on more advanced features.
-
-* Review the week's activities for a refresher on MySQL.
-
-* Check out [SQL Bolt](https://sqlbolt.com/) for some extra MySQL help.
-
-## Minimum Requirements
-
-* Functional application.
-
-* GitHub repository with a unique name and a README describing the project.
-
-* The command-line application should allow users to:
-
-  * Add departments, roles, employees
-
-  * View departments, roles, employees
-
-  * Update employee roles
-
-## Bonus
-
-* The command-line application should allow users to:
-
-  * Update employee managers
-
-  * View employees by manager
-
-  * Delete departments, roles, and employees
-
-  * View the total utilized budget of a department -- ie the combined salaries of all employees in that department
-
-## Commit Early and Often
-
-One of the most important skills to master as a web developer is version control. Building the habit of committing via Git is important for two reasons:
-
-* Your commit history is a signal to employers that you are actively working on projects and learning new skills.
-
-* Your commit history allows you to revert your codebase in the event that you need to return to a previous state.
-
-Follow these guidelines for committing:
-
-* Make single-purpose commits for related changes to ensure a clean, manageable history. If you are fixing two issues, make two commits.
-
-* Write descriptive, meaningful commit messages so that you and anyone else looking at your repository can easily understand its history.
-
-* Don't commit half-done work, for the sake of your collaborators (and your future self!).
-
-* Test your application before you commit to ensure functionality at every step in the development process.
-
-We would like you to have well over 200 commits by graduation, so commit early and often!
-
-**Important**: You will be committing a file that contains your database credentials. Make sure your MySQL password is not used for any other personal accounts, because it will be visible on GitHub. In upcoming lessons, you will learn how to better secure this password, or you can start researching npm packages now that could help you.
+![Screenshot of working website](./hw10.png)
 
 
-## Submission on BCS
 
-You are required to submit the following:
+## Credits
 
-* The URL of the GitHub repository
+@Fil
+@Luca
 
-* A video demonstrating the entirety of the app's functionality 
+### Tutorials
+* https://developer.mozilla.org/
+* https://stackoverflow.com/
 
-- - -
-© 2021 Trilogy Education Services, LLC, a 2U, Inc. brand. Confidential and Proprietary. All Rights Reserved.
+
+
+## Contributing
+
+[Contributor Covenant](https://www.contributor-covenant.org/version/2/0/code_of_conduct/code_of_conduct.md)
+
+
+
+## Tests
+
+The app was tested frequently with console.log throughout the creation.
+
+
+
+## Contact
+
+**GitHub: https://github.com/TalkingSkunk**  
+**Email: talkingSkunk@pm.me**
+
+
+
+&copy; 2021 Sam Kim
