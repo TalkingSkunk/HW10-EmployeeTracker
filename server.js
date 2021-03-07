@@ -41,7 +41,7 @@ menu();
 
 async function viewDepartments() {
     const emptyArray = [];
-    const departmentList = await orm.select('depart_name', 'departments');
+    const departmentList = await orm.select('depart_name', 'departments', 'ORDER BY depart_name ASC');
     departmentList.forEach(item=>{
         emptyArray.push(item.depart_name)
     });
@@ -56,7 +56,7 @@ async function viewDepartments() {
     const id = await orm.select('id', 'departments', `WHERE depart_name='${input.options}'`);
     const totalSalary = await orm.select('SUM(salary) AS totalSalary', 'members', `WHERE depart_id=${id[0].id}`)
 
-    console.log (`\n\n Total salary of ${input.options}:`, `$${totalSalary[0].totalSalary} \n\n`);
+    console.log (`\n [Total salary of ${input.options}] $ ${totalSalary[0].totalSalary} \n`);
     menu();
 }
 
@@ -229,7 +229,7 @@ async function dealWithEmployees() {
     switch (input.options) {
     case 'Add an Employee.':
         async function addEmployee () {
-            console.log (`\n [Adding an Employee...] \n`);
+            console.log ('\n [Adding an Employee...] \n');
             const input = await inquirer.prompt([
                 {
                     type: 'list',
@@ -318,7 +318,7 @@ async function dealWithEmployees() {
         break;
     case 'Edit an Employee.':
         async function editEmployee () {
-            console.log(` \n [Identifying the Employee\'s Location...] \n`);
+            console.log(' \n [Identifying the Employee\'s Location...] \n');
             const input = await inquirer.prompt([
                 {
                     type: 'list',
@@ -478,6 +478,7 @@ async function dealWithEmployees() {
                 const roleID = await orm.select('id', 'roles', `WHERE title='${input4dii.role}'`);
 
                 await orm.update('members', `role_id=${roleID[0].id}, manager_id=${managerID}, depart_id=${departmentID[0].id}`, `id='${employeeID}'`);
+
                 console.log(`\n [Newly Updated Info] Department: [ ${input4di.department} ], Manager: [ ${input4dii.manager} ], Role: [ ${input4dii.role} ] \n`);
 
                 menu();
@@ -491,7 +492,7 @@ async function dealWithEmployees() {
         break;
     case 'Terminate an Employee.':
         async function terminateEmployee(){
-            console.log (`\n [Identifying the Employee...] \n`)
+            console.log ('\n [Identifying the Employee...] \n')
             const input = await inquirer.prompt([
                 {
                     type: 'list',
@@ -546,9 +547,107 @@ async function dealWithEmployees() {
         break;
     }
 }
-// async function dealWithDepartments() {
-
-// }
+async function dealWithDepartments() {
+    const emptyArrayDepartments = [];
+    const departments = await orm.select('depart_name', 'departments', 'ORDER BY depart_name ASC');
+    departments.forEach(item=>{
+        let department={
+            name:`${item.depart_name}`
+        }
+        emptyArrayDepartments.push(department.name);
+    });
+    const input = await inquirer.prompt([
+        {
+            type: 'list',
+            message: 'Choose your options.',
+            name: 'options',
+            choices: ['Add a Department.', 'Update a Department\'s Info.', 'Remove a Department.'],
+        },
+    ]);
+    switch (input.options) {
+    case 'Add a Department.':
+        async function addDepartment (){
+            console.log ('\n [Adding a Department...] \n');
+            const input = await inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'What is the Department\'s name?',
+                    name: 'department',
+                    validate: (value) => {
+                        if (value) {
+                            return true
+                        } else {
+                            return 'You need to give the name to continue.'
+                        }
+                    },
+                },
+            ]);
+            await orm.insert('departments', 'depart_name', `'${input.department}'`);
+            console.log(`\n [The new Department is entered into the database]: ${input.department} \n`);
+            menu();
+        }
+        addDepartment();
+        break;
+    case 'Update a Department\'s Info.':
+        async function editDepartment (){
+            console.log ('\n [Updating a Department...] \n');
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What is the Department?',
+                    name: 'departmentOld',
+                    choices: emptyArrayDepartments,
+                },
+                {
+                    type: 'input',
+                    message: 'What is the Department\'s new name?',
+                    name: 'departmentNew',
+                    validate: (value) => {
+                        if (value) {
+                            return true
+                        } else {
+                            return 'You need to give the name to continue.'
+                        }
+                    },
+                },
+            ]);
+            await orm.update('departments', `depart_name='${input.departmentNew}'`, `depart_name='${input.departmentOld}'`);
+            console.log(`\n [ ${input.departmentOld} ]'s new name is: [ ${input.departmentNew} ] \n`);
+            menu();
+        }
+        editDepartment();
+        break;
+    case 'Remove a Department.':
+        async function terminateDepartment (){
+            console.log ('\n [Removing a Department...] \n');
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What is the Department?',
+                    name: 'department',
+                    choices: emptyArrayDepartments,
+                },
+            ]);
+            const departmentID = await orm.select( '*', 'departments', `WHERE depart_name='${input.department}'` )
+            const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE depart_id=${departmentID[0].id}`);
+            
+            if( employee[0] ){
+                console.log(`\n The Department [ ${input.department} ] still has Employees. Please relocate them prior to deleting the Department.`);
+                console.table(employee);
+                menu();
+            } else {
+                await orm.delete( 'departments', `depart_name='${input.department}'` );
+                console.log(`\n This Department is now removed: [ ${input.department} ] \n`);
+                menu();
+            }
+        }
+        terminateDepartment();
+        break;
+    default:
+        menu();
+        break;
+    }
+}
 
 // async function dealWithRoles(){
 
