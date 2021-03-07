@@ -683,9 +683,19 @@ async function dealWithRoles(){
                         }
                     },
                 },
+                {
+                    type: 'list',
+                    message: 'To what Department does this Role belong?',
+                    name: 'department',
+                    choices: emptyArrayDepartments,
+                },
             ]);
-            await orm.insert('roles', 'title', `'${input.role}'`);
-            console.log(`\n [The new Role is entered into the database]: ${input.role} \n`);
+
+            const departmentID = await orm.select('id', 'departments', `WHERE depart_name='${input.department}'`);
+
+            await orm.insert('roles', 'title, depart_id', `'${input.role}', ${departmentID[0].id}`);
+
+            console.log(`\n The new Role is entered into Department [ ${input.department} ]: ${input.role} \n`);
             menu();
         }
         addRole();
@@ -743,8 +753,44 @@ async function dealWithRoles(){
     case 'Remove a Role.':
         async function removeRole() {
             console.log ('\n [Deleting a Role...] \n');
+            const input = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'In which Department is the Role located?',
+                    name: 'department',
+                    choices: emptyArrayDepartments,
+                },
+            ]);
+            const departmentID = await orm.select( '*', 'departments', `WHERE depart_name='${input.department}'`);
+            const emptyArrayRoles = [];
+            const roles = await orm.select('*', 'roles', `WHERE depart_id='${departmentID[0].id}' ORDER BY title ASC`);
+            roles.forEach(item=>{
+                let role={
+                    title:`${item.title}`,
+                }
+                emptyArrayRoles.push(role.title);
+            });
 
-            menu();
+            const input2 = await inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'What Role would you like to delete?',
+                    name: 'role',
+                    choices: emptyArrayRoles,
+                },
+            ]);
+            const roleID = await orm.select( '*', 'roles', `WHERE title='${input2.role}'`);
+            const employee = await orm.select('firstname, lastname, salary', 'members', `WHERE role_id=${roleID[0].id}`);
+
+            if( employee[0] ){
+                console.log(`\n The Role [ ${input2.role} ] still has Employees. Please relocate them prior to deleting the Role.`);
+                console.table(employee);
+                menu();
+            } else {
+                await orm.delete( 'roles', `title='${input2.role}'` );
+                console.log(`\n This Role is now deleted: [ ${input2.role} ] \n`);
+                menu();
+            }
         }
         removeRole();
         break;
