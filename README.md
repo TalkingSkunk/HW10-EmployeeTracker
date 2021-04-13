@@ -6,6 +6,8 @@ https://drive.google.com/file/d/1mg9PtbxynMKYJKRs0zl-XtA6FD6B6lKR/view
 **GitHub Repository URL**
 https://github.com/TalkingSkunk/HW10-EmployeeTracker
 
+## Future Developments
+* Create a Add/Edit/Remove a Manager section
 
 
 ## Table of Contents
